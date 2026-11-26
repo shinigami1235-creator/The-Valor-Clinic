@@ -45,9 +45,16 @@ function showStep(i) {
   $$('button', dots).forEach((d, k) => d.classList.toggle('on', k === i));
   body.setStep(i);
 }
+// a click jumps straight to its step; the steps the page scrolls past on the way are ignored
+let lock = null, lockTimer = 0;
+const unlock = () => { lock = null; clearTimeout(lockTimer); };
+['wheel', 'touchstart', 'keydown'].forEach((ev) => addEventListener(ev, unlock, { passive: true }));
 function goStep(i) {
-  if (st) { const y = st.start + (st.end - st.start) * ((i + 0.5) / steps.length); scrollTo({ top: y, behavior: 'smooth' }); }
-  else showStep(i);
+  showStep(i);
+  if (!st) return;
+  lock = i; clearTimeout(lockTimer); lockTimer = setTimeout(unlock, 1600);
+  const y = st.start + (st.end - st.start) * ((i + 0.5) / steps.length);
+  scrollTo({ top: y, behavior: 'smooth' });
 }
 showStep(0);
 window.addEventListener('load', () => {
@@ -56,7 +63,11 @@ window.addEventListener('load', () => {
   st = ST.create({
     trigger: '#beyond', start: 'top top', end: () => '+=' + innerHeight * steps.length * 0.8,
     pin: '#beyond .pin', pinSpacing: true, anticipatePin: 1,
-    onUpdate: (self) => showStep(Math.min(steps.length - 1, Math.floor(self.progress * steps.length))),
+    onUpdate: (self) => {
+      const i = Math.min(steps.length - 1, Math.floor(self.progress * steps.length));
+      if (lock !== null) { if (i === lock) unlock(); return; }
+      showStep(i);
+    },
   });
   ST.refresh();
 });
