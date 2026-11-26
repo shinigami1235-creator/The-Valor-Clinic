@@ -1,5 +1,6 @@
 """Builds the site pages from tools/pages/*.html into the repo root. Run: python3 tools/build.py"""
 from pathlib import Path
+import hashlib
 from partials import page, ICONS, SWOOSH
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -17,12 +18,13 @@ PAGES = {
     'videos.html': ('Videos | Valor Clinic', 'Psoriasis, skin, heart and liver videos from the doctors at Valor Clinic.', 'pages.js'),
     'contact.html': ('Contact Us | Valor Clinic', '2/22 Iyara Tower 10th Fl., Chan Road, Sathorn, Bangkok. By appointment. 02-287-4924, LINE @valorclinic.', 'pages.js'),
 }
+V = hashlib.sha1(b''.join(f.read_bytes() for f in sorted((ROOT / 'js').glob('*.js')) + [ROOT / 'css/site.css'])).hexdigest()[:8]
 for name, (title, desc, js) in PAGES.items():
     body = (ROOT / 'tools/pages' / name).read_text()
     for k, v in {'__SWOOSH__': SWOOSH, '__BOOK__': BOOK, '__LINE__': ICONS['line'], '__PHONE__': ICONS['phone'],
                  '__ARROW__': ICONS['arrow'], '__YT__': ICONS['yt'], '__TT__': ICONS['tt'], '__IG__': ICONS['ig'],
                  '__FB__': ICONS['fb'], '__G__': ICONS['g'], '__MSG__': ICONS['msg']}.items():
         body = body.replace(k, v)
-    html = page(title, desc, name, body, f'<script type="module" src="js/{js}"></script>')
+    html = page(title, desc, name, body, f'<script type="module" src="js/{js}?v={V}"></script>', V, gsap=(js == 'home.js'))
     (ROOT / name).write_text(html)
     print('built', name)

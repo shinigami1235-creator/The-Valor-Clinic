@@ -1,7 +1,6 @@
 import { $, $$, vcard, fixThumbs, openVideo, reveal } from './site.js';
 import { QA, TIKTOK_STORIES, TESTIMONIALS, REVIEWS, GOOGLE, VIDEOS, LINKS } from './data.js';
 import { initSkin } from './skin3d.js';
-import { initBody } from './body3d.js';
 
 const STAR = '<svg viewBox="0 0 24 24"><path fill="currentColor" d="M12 2l3 6.9 7.5.7-5.7 5 1.7 7.4L12 18.3 5.5 22l1.7-7.4L1.5 9.6 9 8.9z"/></svg>';
 
@@ -22,13 +21,6 @@ $$('button', seg).forEach((b) => b.addEventListener('click', () => {
   skin.setMode(m);
 }));
 
-// headline entrance
-window.addEventListener('load', () => {
-  const g = window.gsap; if (!g || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  g.from('.hero h1 .line>span', { yPercent: 110, duration: 1.1, ease: 'power4.out', stagger: 0.09 });
-  g.from('.cycle', { y: 40, opacity: 0, duration: 1, delay: 0.4, ease: 'power3.out' });
-  g.from('.hero-tag', { opacity: 0, duration: 1, delay: 0.6 });
-});
 
 // ---------- look beyond your skin ----------
 const steps = $$('#steps .step');
@@ -38,7 +30,15 @@ steps.forEach((s, i) => {
   d.addEventListener('click', () => goStep(i)); dots.appendChild(d);
 });
 let cur = -1, st = null;
-const body = initBody($('#body3d'), $('#marks'), (i) => goStep(i));
+// the body model and its 198 KB mesh load only when the section comes near
+let body = { setStep() {} };
+new IntersectionObserver(async ([e], io) => {
+  if (!e.isIntersecting) return;
+  io.disconnect();
+  const { initBody } = await import('./body3d.js');
+  body = initBody($('#body3d'), $('#marks'), (i) => goStep(i));
+  body.setStep(Math.max(0, cur));
+}, { rootMargin: '900px 0px' }).observe($('#beyond'));
 function showStep(i) {
   if (i === cur) return; cur = i;
   steps.forEach((s, k) => s.classList.toggle('on', k === i));
@@ -57,7 +57,7 @@ function goStep(i) {
   scrollTo({ top: y, behavior: 'smooth' });
 }
 showStep(0);
-window.addEventListener('load', () => {
+(() => {
   const g = window.gsap, ST = window.ScrollTrigger; if (!g || !ST) return;
   g.registerPlugin(ST);
   st = ST.create({
@@ -69,8 +69,8 @@ window.addEventListener('load', () => {
       showStep(i);
     },
   });
-  ST.refresh();
-});
+  addEventListener('load', () => ST.refresh());
+})();
 
 // ---------- services accordion ----------
 const svcs = $$('#svcRow .svc');
@@ -98,21 +98,22 @@ const rail = $('#storyRail');
 const ytStories = VIDEOS.filter((v) => v.cat === 'story');
 rail.innerHTML = TIKTOK_STORIES.map((s) => `<button class="tk rv-up" data-tt="${s.id}" type="button"><blockquote>${s.quote}</blockquote><span class="meta"><span><b>${s.views}</b>views on TikTok</span><span class="pbtn"></span></span></button>`).join('')
   + `<div class="yt-story rv-up">${ytStories.map((v) => vcard(v)).join('')}</div>`;
-$('#quotes').innerHTML = TESTIMONIALS.map((t, i) => `<figure class="quote rv-up" style="margin:0"><p>“${t.text}”</p><figcaption class="who"><img class="av" src="https://thevalorclinic.com/wp-content/uploads/2023/01/customer-0${i + 1}.jpg" alt="" loading="lazy"><span><b>${t.name}</b><span>${t.role}</span></span></figcaption></figure>`).join('');
+$('#quotes').innerHTML = TESTIMONIALS.map((t, i) => `<figure class="quote rv-up" style="margin:0"><p>“${t.text}”</p><figcaption class="who"><img class="av" src="https://thevalorclinic.com/wp-content/uploads/2023/01/customer-0${i + 1}.jpg" alt="" loading="lazy" width="44" height="44"><span><b>${t.name}</b><span>${t.role}</span></span></figcaption></figure>`).join('');
 
 // ---------- Google reviews ----------
 $('#gStars').innerHTML = STAR.repeat(5);
 $('#gRate').textContent = GOOGLE.rating; $('#gCount').textContent = GOOGLE.count;
 $('#gLink').href = LINKS.reviews; $('#gbLink').href = LINKS.reviews;
 const rv = (r) => `<article class="rv"><div class="top"><span class="ini">${r.name.trim()[0].toUpperCase()}</span><div><b>${r.name}</b><small>${r.when}</small></div></div><span class="stars">${STAR.repeat(r.stars)}</span><p>${r.text}</p></article>`;
-const half = Math.ceil(REVIEWS.length / 2);
-const a = REVIEWS.slice(0, half), b = REVIEWS.slice(half);
-$('#rowA').innerHTML = [...a, ...a, ...a].map(rv).join('');
-$('#rowB').innerHTML = [...b, ...b, ...b].map(rv).join('');
+const row = $('#rvRow');
+row.innerHTML = REVIEWS.map(rv).join('');
+const step = () => row.firstElementChild.getBoundingClientRect().width + 16;
+$('#rvPrev').addEventListener('click', () => row.scrollBy({ left: -step(), behavior: 'smooth' }));
+$('#rvNext').addEventListener('click', () => row.scrollBy({ left: step(), behavior: 'smooth' }));
 
 // ---------- videos ----------
 const top = ['qIHhYvWqi2I', 'SKEZ26F6Dy8', '_o6Q7lav_sI', 'yuEoaf8AX5c', 'eaRhtunzobY'];
-$('#vwall').innerHTML = top.map((id) => vcard(VIDEOS.find((v) => v.id === id))).join('');
+$('#vwall').innerHTML = top.map((id, i) => vcard(VIDEOS.find((v) => v.id === id), '', i ? 'hqdefault' : 'maxresdefault')).join('');
 
 fixThumbs(document);
 reveal();

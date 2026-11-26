@@ -77,14 +77,5 @@ if (form) form.addEventListener('submit', (e) => {
   location.href = `mailto:${LINKS.email}?subject=${encodeURIComponent(f.get('subject') || 'Message from the website')}&body=${encodeURIComponent(body)}`;
 });
 
-// headline entrance on inner pages
-addEventListener('load', () => {
-  const g = window.gsap; if (!g || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  g.from('.phero h1', { y: 60, opacity: 0, duration: 1, ease: 'power4.out' });
-  g.from('.phero .lede', { y: 30, opacity: 0, duration: 1, delay: 0.15, ease: 'power3.out' });
-  const sw = $('.phero .swoosh path');
-  if (sw) { const L = sw.getTotalLength(); sw.style.strokeDasharray = L; g.fromTo(sw, { strokeDashoffset: L }, { strokeDashoffset: 0, duration: 1.8, ease: 'power2.inOut' }); }
-});
-
 fixThumbs(document);
 reveal();

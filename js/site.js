@@ -19,39 +19,29 @@ $('#burger')?.addEventListener('click', (e) => {
 $$('.nav ul a').forEach((a) => a.addEventListener('click', () => document.body.classList.remove('menu-open')));
 const yr = $('#yr'); if (yr) yr.textContent = new Date().getFullYear();
 
-// reveal
-const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
-export function reveal(root = document) { $$('.rv-up:not(.in)', root).forEach((el) => io.observe(el)); }
-reveal();
+// sections no longer animate in on scroll; kept so page scripts can call it
+export function reveal() {}
 
 // YouTube thumbnails: fall back when the large one does not exist
 export function thumbFix(img) {
-  img.addEventListener('load', () => { if (img.naturalWidth <= 120 && !img.dataset.fb) { img.dataset.fb = 1; img.src = img.src.replace(/(maxresdefault|oar2)/, 'hqdefault'); } });
-  img.addEventListener('error', () => { if (!img.dataset.fb) { img.dataset.fb = 1; img.src = img.src.replace(/(maxresdefault|oar2)/, 'hqdefault'); } });
+  img.addEventListener('load', () => { if (img.naturalWidth <= 120 && !img.dataset.fb) { img.dataset.fb = 1; img.src = img.src.replace(/(maxresdefault|sddefault|oar2)/, 'hqdefault'); } });
+  img.addEventListener('error', () => { if (!img.dataset.fb) { img.dataset.fb = 1; img.src = img.src.replace(/(maxresdefault|sddefault|oar2)/, 'hqdefault'); } });
 }
 $$('img[src*="i.ytimg.com"]').forEach(thumbFix);
 
-// video modal
+// video player: a native <dialog> (Esc, back gesture and click outside close it)
 const modal = $('#modal'), frame = $('#modalFrame'), txt = $('#modalTxt');
-let lastFocus = null;
 export function openVideo({ yt, tt, vertical, html }) {
-  lastFocus = document.activeElement;
   modal.classList.toggle('vert', !!vertical);
   frame.innerHTML = yt
     ? `<iframe src="https://www.youtube-nocookie.com/embed/${yt}?autoplay=1&rel=0&playsinline=1" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen title="Video"></iframe>`
     : `<iframe src="https://www.tiktok.com/player/v1/${tt}?autoplay=1&rel=0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen title="TikTok video"></iframe>`;
   txt.innerHTML = html || '';
-  modal.classList.add('open');
-  document.documentElement.style.overflow = 'hidden';
-  $('#modalX').focus();
+  modal.showModal();
 }
-function closeVideo() {
-  modal.classList.remove('open'); frame.innerHTML = ''; document.documentElement.style.overflow = '';
-  lastFocus && lastFocus.focus();
-}
-$('#modalX')?.addEventListener('click', closeVideo);
-modal?.addEventListener('click', (e) => { if (e.target === modal) closeVideo(); });
-addEventListener('keydown', (e) => { if (e.key === 'Escape' && modal.classList.contains('open')) closeVideo(); });
+modal?.addEventListener('close', () => { frame.innerHTML = ''; });
+// the dialog fills the screen, so a click on its empty area (not the video or the text) closes it
+modal?.addEventListener('click', (e) => { if (e.target === modal || e.target.classList.contains('box')) modal.close(); });
 document.addEventListener('click', (e) => {
   const b = e.target.closest('[data-yt],[data-tt]');
   if (!b || b.closest('#modal')) return;
@@ -59,10 +49,11 @@ document.addEventListener('click', (e) => {
   openVideo({ yt: b.dataset.yt, tt: b.dataset.tt, vertical: b.dataset.vertical === '1' || !!b.dataset.tt });
 });
 
-export function vcard(v, extra = '') {
-  const src = `https://i.ytimg.com/vi/${v.id}/${v.hq ? 'hqdefault' : 'maxresdefault'}.jpg`;
+// size: hqdefault (480 wide) for cards, maxresdefault for the one large card
+export function vcard(v, extra = '', size = 'hqdefault') {
+  const src = `https://i.ytimg.com/vi/${v.id}/${v.hq ? 'hqdefault' : size}.jpg`;
   return `<button class="vcard ${extra}" data-yt="${v.id}" type="button">
-    <img src="${src}" alt="" loading="lazy">
+    <img src="${src}" alt="" loading="lazy" decoding="async" width="480" height="270">
     ${v.views ? `<span class="views">${v.views} views</span>` : ''}<span class="dur">${v.d}</span><span class="pl"></span>
     <span class="cap">${v.t}</span></button>`;
 }

@@ -59,14 +59,14 @@ FOOTER = f'''<footer><div class="wrap">
 <div class="fine"><span>Copyright © <span id="yr">2026</span> Valor Clinic</span><span lang="th">เลขที่อนุญาตโฆษณา ฆสพ.สบส 7052/2567</span></div>
 </div></footer>
 <a class="pin-line" id="pinLine" href="https://lin.ee/SUTknY5" target="_blank" rel="noopener">{ICONS["line"]}<span>Book on LINE<small>@valorclinic</small></span></a>
-<div class="modal" id="modal" role="dialog" aria-modal="true" aria-label="Video"><div class="box">
- <button class="x" id="modalX" aria-label="Close">×</button>
+<dialog class="modal" id="modal" closedby="any" aria-label="Video"><div class="box">
+ <form method="dialog"><button class="x" id="modalX" aria-label="Close" autofocus>×</button></form>
  <div class="frame" id="modalFrame"></div>
  <div class="txt" id="modalTxt"></div>
-</div></div>'''
+</div></dialog>'''
 
 
-def page(title, desc, current, body, scripts=''):
+def page(title, desc, current, body, scripts='', v='', gsap=False):
     return f'''<!doctype html>
 <html lang="en">
 <head>
@@ -79,8 +79,10 @@ def page(title, desc, current, body, scripts=''):
 <meta property="og:description" content="{desc}">
 <meta property="og:image" content="https://i.ytimg.com/vi/xGNp8zgXBd0/maxresdefault.jpg">
 <link rel="icon" href="assets/favicon.png">
+<link rel="preconnect" href="https://i.ytimg.com">
 <link rel="preload" href="fonts/prompt-latin-600-normal.woff2" as="font" type="font/woff2" crossorigin>
-<link rel="stylesheet" href="css/site.css">
+<link rel="preload" href="fonts/prompt-latin-300-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="css/site.css?v={v}">
 <script type="importmap">{{"imports":{{"three":"./vendor/three.module.min.js"}}}}</script>
 </head>
 <body>
@@ -90,9 +92,7 @@ def page(title, desc, current, body, scripts=''):
 {body}
 </main>
 {FOOTER}
-<script src="vendor/gsap.min.js" defer></script>
-<script src="vendor/ScrollTrigger.min.js" defer></script>
-<script type="module" src="js/site.js"></script>
+{'<script src="vendor/gsap.min.js" defer></script>' + chr(10) + '<script src="vendor/ScrollTrigger.min.js" defer></script>' if gsap else ''}
 {scripts}
 </body>
 </html>
