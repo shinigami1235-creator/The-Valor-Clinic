@@ -40,6 +40,7 @@ export function initBody(canvas, marksEl, onPick) {
   const S = 2.5, Y0 = -2.0;
   const H = (x, y, z) => new THREE.Vector3(x * S, y * S + Y0, z * S);
   const bodyMat = glass();
+  let bodyMesh = null;
   const skinMat = new THREE.PointsMaterial({ color: 0xff8f86, size: 0.02, transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending });
   const tmp = new THREE.Vector3();
   fetch(new URL('../assets/figure.bin', import.meta.url)).then((r) => r.arrayBuffer()).then((buf) => {
@@ -51,7 +52,7 @@ export function initBody(canvas, marksEl, onPick) {
     g.setAttribute('position', new THREE.BufferAttribute(Float32Array.from(pos, (v) => v / 16000), 3));
     g.setAttribute('normal', new THREE.BufferAttribute(Float32Array.from(nrm, (v) => v / 127), 3));
     g.setIndex(new THREE.BufferAttribute(idx, 1));
-    const body = new THREE.Mesh(g, bodyMat);
+    const body = new THREE.Mesh(g, bodyMat); bodyMesh = body;
     body.scale.setScalar(S); body.position.y = Y0; fig.add(body);
     // skin: dots across the surface
     const pts = [];
@@ -74,10 +75,19 @@ export function initBody(canvas, marksEl, onPick) {
   // heart
   const heart = new THREE.Group(); fig.add(heart);
   const hm = organMat(0xe2342c);
-  const h1 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 24), hm); h1.position.set(-0.042, 0.035, 0);
-  const h2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 24), hm); h2.position.set(0.042, 0.035, 0);
-  const h3 = new THREE.Mesh(new THREE.ConeGeometry(0.105, 0.18, 32), hm); h3.position.set(0, -0.07, 0); h3.rotation.z = Math.PI;
-  heart.add(h1, h2, h3); heart.position.copy(H(0.03, 1.2, 0.03)); heart.rotation.z = 0.35;
+  // the regular heart symbol, puffed out with a rounded bevel
+  const hs = new THREE.Shape();
+  hs.moveTo(0, -0.6);
+  hs.bezierCurveTo(-0.15, -0.42, -1, 0.05, -1, 0.5);
+  hs.bezierCurveTo(-1, 0.92, -0.55, 1.12, -0.25, 1.05);
+  hs.bezierCurveTo(-0.08, 1.0, 0, 0.85, 0, 0.72);
+  hs.bezierCurveTo(0, 0.85, 0.08, 1.0, 0.25, 1.05);
+  hs.bezierCurveTo(0.55, 1.12, 1, 0.92, 1, 0.5);
+  hs.bezierCurveTo(1, 0.05, 0.15, -0.42, 0, -0.6);
+  const hg = new THREE.ExtrudeGeometry(hs, { depth: 0.25, bevelEnabled: true, bevelThickness: 0.28, bevelSize: 0.18, bevelSegments: 10, curveSegments: 40 });
+  hg.center(); hg.computeVertexNormals();
+  const heartMesh = new THREE.Mesh(hg, hm); heartMesh.scale.setScalar(0.105);
+  heart.add(heartMesh); heart.position.copy(H(0.03, 1.2, 0.03)); heart.rotation.z = -0.2;
 
   // liver
   const lm = organMat(0x9e2a24);
@@ -105,11 +115,11 @@ export function initBody(canvas, marksEl, onPick) {
 
   const organs = [
     { at: H(-0.33, 1.13, 0.06), mats: [], cam: [0.5, 0.15, 7.1], look: [0, 0.05, 0] },
-    { at: H(0.13, 0.457, 0.06), mats: [jm], cam: [2.4, 0.3, 5.8], look: [0.35, -0.1, 0] },
-    { at: H(0.03, 1.2, 0.08), mats: [hm], cam: [0.8, 1.2, 2.8], look: [0.07, 0.98, 0] },
-    { at: H(-0.06, 1.075, 0.07), mats: [lm], cam: [-1.0, 0.9, 2.9], look: [-0.12, 0.68, 0] },
-    { at: H(0, 0.98, 0.11), mats: [core.material], cam: [0.6, 0.7, 3.2], look: [0, 0.45, 0] },
-    { at: H(0, 1.56, 0.1), mats: [brain.material], cam: [0.8, 2.15, 3.0], look: [0, 1.75, 0] },
+    { obj: joints, at: H(0.13, 0.457, 0.06), mats: [jm], cam: [2.4, 0.3, 5.8], look: [0.35, -0.1, 0] },
+    { obj: heart, at: H(0.085, 1.215, 0.08), mats: [hm], cam: [0.8, 1.2, 2.8], look: [0.07, 0.98, 0] },
+    { obj: liver, at: H(-0.06, 1.075, 0.07), mats: [lm], cam: [-1.0, 0.9, 2.9], look: [-0.12, 0.68, 0] },
+    { obj: metab, at: H(0, 0.98, 0.11), mats: [core.material], cam: [0.6, 0.7, 3.2], look: [0, 0.45, 0] },
+    { obj: brain, at: H(0, 1.56, 0.1), mats: [brain.material], cam: [0.8, 2.15, 3.0], look: [0, 1.75, 0] },
   ];
   const labels = ['Skin', 'Joints', 'Heart', 'Liver', 'Metabolism', 'Mind'];
   const marks = labels.map((t, i) => {
@@ -141,7 +151,21 @@ export function initBody(canvas, marksEl, onPick) {
   new ResizeObserver(resize).observe(canvas); resize();
 
   let rot = 0, rotT = 0, drag = null;
-  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, r: rotT }; });
+  const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  ray.params.Points.threshold = 0.03;
+  let down = null;
+  canvas.addEventListener('pointerdown', (e) => { drag = { x: e.clientX, r: rotT }; down = { x: e.clientX, y: e.clientY }; });
+  canvas.addEventListener('pointerup', (e) => {
+    if (!down || Math.hypot(e.clientX - down.x, e.clientY - down.y) > 6) return;
+    const r = canvas.getBoundingClientRect();
+    ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+    ray.setFromCamera(ndc, camera);
+    for (let i = 1; i < organs.length; i++) {
+      const o = organs[i].obj;
+      if (o && ray.intersectObject(o, true).length) { onPick && onPick(i); return; }
+    }
+    if (!bodyMesh || !ray.intersectObject(bodyMesh).length) onPick && onPick(0);
+  });
   addEventListener('pointermove', (e) => { if (drag) rotT = drag.r + (e.clientX - drag.x) * 0.006; });
   addEventListener('pointerup', () => { drag = null; });
 
