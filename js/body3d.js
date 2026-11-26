@@ -104,7 +104,7 @@ export function initBody(canvas, marksEl, onPick) {
   const l2 = new THREE.PointLight(0xff5a50, 18, 20); l2.position.set(-3, -1, 2); scene.add(l2);
 
   const organs = [
-    { at: H(0.36, 1.1, 0.07), mats: [], cam: [0.5, 0.15, 7.1], look: [0, 0.05, 0] },
+    { at: H(-0.33, 1.13, 0.06), mats: [], cam: [0.5, 0.15, 7.1], look: [0, 0.05, 0] },
     { at: H(0.13, 0.457, 0.06), mats: [jm], cam: [2.4, 0.3, 5.8], look: [0.35, -0.1, 0] },
     { at: H(0.03, 1.2, 0.08), mats: [hm], cam: [0.8, 1.2, 2.8], look: [0.07, 0.98, 0] },
     { at: H(-0.06, 1.075, 0.07), mats: [lm], cam: [-1.0, 0.9, 2.9], look: [-0.12, 0.68, 0] },
@@ -134,7 +134,7 @@ export function initBody(canvas, marksEl, onPick) {
   function resize() {
     const w = canvas.clientWidth, h = canvas.clientHeight; if (!w || !h) return;
     renderer.setSize(w, h, false); camera.aspect = w / h;
-    offX = w > 820 ? w * 0.1 : -w * 0.2;
+    offX = w > 820 ? w * 0.14 : -w * 0.2;
     if (offX) camera.setViewOffset(w, h, offX, 0, w, h); else camera.clearViewOffset();
     camera.updateProjectionMatrix();
   }
