@@ -175,8 +175,8 @@ export function initSkin(canvas, onTick) {
     mobile = w < 820;
     const wide = camera.aspect > 1.25;
     camera.fov = mobile ? 34 : 30;
-    camera.position.set(0, mobile ? 5.2 : 4.4, mobile ? 13.6 : 11.2);
-    camera.lookAt(0, mobile ? -0.35 : 0.55, 0);
+    camera.position.set(0, mobile ? 5.2 : 4.4, mobile ? 12.4 : 11.2);
+    camera.lookAt(0, mobile ? -0.15 : 0.55, 0);
     root.position.set(wide ? 1.75 : 0, wide ? 0.1 : 0, 0);
     root.scale.setScalar(mobile ? 0.86 : wide ? 0.88 : 1);
     camera.updateProjectionMatrix();

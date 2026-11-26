@@ -26,6 +26,7 @@ def nav(current):
     items = ''.join(
         f'<li><a href="{h}"{" aria-current=page" if h == current else ""}{" target=_blank rel=noopener" if h.startswith("http") else ""}>{t}</a></li>'
         for h, t in NAV_ITEMS)
+    items += f'<li class="m-only"><a class="btn btn-line" href="https://lin.ee/SUTknY5" target="_blank" rel="noopener">{ICONS["line"]}Book on LINE</a></li><li class="m-only m-row"><a href="tel:022874924">02-287-4924</a><a href="https://thevalorclinic.com/" lang="th">ไทย</a></li>'
     return f'''<header class="nav" id="nav"><div class="wrap">
 <a class="logo" href="index.html" aria-label="Valor Clinic home"><img src="assets/logo.png" alt="Valor Clinic" width="132" height="44"></a>
 <ul>{items}</ul>

@@ -457,3 +457,44 @@ dialog.modal:modal{overscroll-behavior:contain}
   .svc:not(.open) .tag{display:none}
   .svc:not(.open) h3{writing-mode:vertical-rl;transform:rotate(180deg);font-size:22px;max-height:380px;line-height:1.1}
 }
+
+/* ---------- phones ---------- */
+.nav .m-only{display:none}
+@media (max-width:1180px){
+  .menu-open .nav ul{max-height:calc(100svh - var(--nav-h));overflow:auto}
+  .menu-open .nav .m-only{display:block;margin-top:10px}
+  .menu-open .nav .m-only .btn{display:inline-flex;font-size:17px;padding:12px 20px}
+  .menu-open .nav .m-row{display:flex;gap:24px}
+  .menu-open .nav .m-row a{font-size:17px;padding:10px 0;color:var(--ink-2)}
+}
+@media (max-width:820px){
+  .hero{padding-top:50svh}
+  .hero canvas{height:52svh}
+  .hero-tag{top:calc(var(--nav-h) + 6px);font-size:14px}
+  .hero-bottom{gap:18px;padding-bottom:28px}
+  .cycle{padding:14px}
+  .daybox{margin:12px 4px 6px}
+  .daybox .num{font-size:46px}
+  .band{font-size:21px;padding:16px 0}
+  .band .track{flex-direction:column;align-items:flex-start;gap:6px}
+  .band .track span::after{display:none}
+  .band .track span::before{content:'';width:30px;height:14px;margin-right:12px;flex:none;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 46 20'%3E%3Cpath d='M2 9c5 0 7 9 11 9S29 4 44 2' fill='none' stroke='%23fff' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/contain;opacity:.8}
+  .band .track span{gap:0}
+  .vwall .vcard:not(:first-child) .views,.vwall .vcard:not(:first-child) .pl{display:none}
+  .vwall .vcard:not(:first-child) .cap{font-size:13px;padding:30px 10px 9px}
+  .vwall .vcard:not(:first-child) .dur{font-size:11px;top:6px;right:6px}
+  .pin-line{right:12px;bottom:12px;padding:9px 14px 9px 10px;font-size:15px;border-radius:12px}
+  .pin-line small{display:none}
+  .pin-line svg{width:22px;height:22px}
+  footer{padding-bottom:90px}
+}
+@media (max-width:560px){
+  footer .cols{grid-template-columns:1fr 1fr;gap:28px 20px}
+  footer .cols>div:first-child,footer .cols>div:last-child{grid-column:1/-1}
+  .vgrid .vcard .cap{font-size:14px}
+}
+@media (max-width:560px){
+  .qcard{min-height:0;gap:18px;padding:18px}
+  .qcard .q{font-size:20px}
+  .qcard.big{min-height:300px}
+}
