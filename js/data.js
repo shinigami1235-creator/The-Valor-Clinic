@@ -94,7 +94,7 @@ export const QA = [
   { id: 'Jv2dlzqlS5A', q: 'Can I get vaccinated?',
     a: 'Yes. People with psoriasis can be vaccinated like anyone else. Some psoriasis medicines limit the timing or type of vaccine, so talk to your doctor first if you are on treatment.' },
   { id: 'Zfj-W2Ib1uY', q: 'What can’t I eat?',
-    a: 'No food is clearly forbidden. What is truly off limits is alcohol, smoking and weight gain, since obesity drives chronic inflammation across the body and makes psoriasis more severe and harder to treat.' },
+    a: 'No food is clearly forbidden. What you do need to avoid is alcohol, smoking and weight gain, since obesity drives chronic inflammation across the body and makes psoriasis more severe and harder to treat.' },
   { id: 'fWQ0RBh1WCY', q: 'Are steroids bad for me?',
     a: 'Used correctly under a doctor’s care, steroids treat and control the disease safely. Think of a knife: risky in hands that don’t know how to use it and very useful in a chef’s hands.' },
   { id: 'yDORg1Tsctg', q: 'At what age does it start?',
