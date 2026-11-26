@@ -35,8 +35,9 @@ export function initBody(canvas, marksEl, onPick) {
   const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
   const fig = new THREE.Group(); scene.add(fig);
 
-  // standing human built in tools/make_figure.py (metres, feet at 0), scaled to scene units
-  const S = 2.4, Y0 = -2.0;
+  // standing human from the MakeHuman base mesh (CC0, same source as the Apex Surgery body map), built by
+  // tools/body_from_apex.py: metres, feet at 0, facing +z, scaled to scene units
+  const S = 2.5, Y0 = -2.0;
   const H = (x, y, z) => new THREE.Vector3(x * S, y * S + Y0, z * S);
   const bodyMat = glass();
   const skinMat = new THREE.PointsMaterial({ color: 0xff8f86, size: 0.02, transparent: true, opacity: 0.25, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -54,7 +55,7 @@ export function initBody(canvas, marksEl, onPick) {
     body.scale.setScalar(S); body.position.y = Y0; fig.add(body);
     // skin: dots across the surface
     const pts = [];
-    for (let i = 0; i < nv; i += 5) pts.push(pos[i * 3] / 16000 + nrm[i * 3] / 127 * 0.004, pos[i * 3 + 1] / 16000 + nrm[i * 3 + 1] / 127 * 0.004, pos[i * 3 + 2] / 16000 + nrm[i * 3 + 2] / 127 * 0.004);
+    for (let i = 0; i < nv; i += 3) pts.push(pos[i * 3] / 16000 + nrm[i * 3] / 127 * 0.004, pos[i * 3 + 1] / 16000 + nrm[i * 3 + 1] / 127 * 0.004, pos[i * 3 + 2] / 16000 + nrm[i * 3 + 2] / 127 * 0.004);
     const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
     const dots = new THREE.Points(sg, skinMat); dots.scale.setScalar(S); dots.position.y = Y0; fig.add(dots);
   });
@@ -64,9 +65,9 @@ export function initBody(canvas, marksEl, onPick) {
   // joints: shoulders, wrists and knees
   const joints = new THREE.Group(); fig.add(joints);
   const jm = organMat(0xff6a62);
-  [[-0.185, 1.385, -0.01], [0.185, 1.385, -0.01], [-0.278, 0.86, 0.02], [0.278, 0.86, 0.02], [-0.098, 0.49, 0.012], [0.098, 0.49, 0.012]].forEach(([x, y, z]) => {
+  [[-0.19, 1.33, 0.0], [0.19, 1.33, 0.0], [-0.415, 1.03, 0.1], [0.415, 1.03, 0.1], [-0.13, 0.457, 0.01], [0.13, 0.457, 0.01]].forEach(([x, y, z]) => {
     const c = H(x, y, z);
-    const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 24, 16), jm); s1.position.copy(c); joints.add(s1);
+    const s1 = new THREE.Mesh(new THREE.SphereGeometry(0.07, 24, 16), jm); s1.position.copy(c); joints.add(s1);
     const ring = new THREE.Mesh(new THREE.TorusGeometry(0.12, 0.008, 8, 48), jm); ring.position.copy(c); ring.rotation.x = Math.PI / 2; joints.add(ring);
   });
 
@@ -76,15 +77,15 @@ export function initBody(canvas, marksEl, onPick) {
   const h1 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 24), hm); h1.position.set(-0.042, 0.035, 0);
   const h2 = new THREE.Mesh(new THREE.SphereGeometry(0.075, 32, 24), hm); h2.position.set(0.042, 0.035, 0);
   const h3 = new THREE.Mesh(new THREE.ConeGeometry(0.105, 0.18, 32), hm); h3.position.set(0, -0.07, 0); h3.rotation.z = Math.PI;
-  heart.add(h1, h2, h3); heart.position.copy(H(0.035, 1.28, 0.035)); heart.rotation.z = 0.35;
+  heart.add(h1, h2, h3); heart.position.copy(H(0.03, 1.2, 0.03)); heart.rotation.z = 0.35;
 
   // liver
   const lm = organMat(0x9e2a24);
   const liver = new THREE.Mesh(new THREE.SphereGeometry(0.15, 40, 24), lm);
-  liver.scale.set(1.4, 0.72, 0.85); liver.rotation.z = -0.22; liver.position.copy(H(-0.06, 1.135, 0.025)); fig.add(liver);
+  liver.scale.set(1.4, 0.72, 0.85); liver.rotation.z = -0.22; liver.position.copy(H(-0.06, 1.075, 0.03)); fig.add(liver);
 
   // metabolism: particles orbiting the belly
-  const metab = new THREE.Group(); metab.position.copy(H(0, 1.0, 0.02)); fig.add(metab);
+  const metab = new THREE.Group(); metab.position.copy(H(0, 0.98, 0.03)); fig.add(metab);
   const mp = []; for (let i = 0; i < 260; i++) { const a = Math.random() * Math.PI * 2, r = 0.12 + Math.random() * 0.16; mp.push(Math.cos(a) * r, (Math.random() - 0.5) * 0.18, Math.sin(a) * r * 0.6); }
   const mg = new THREE.BufferGeometry(); mg.setAttribute('position', new THREE.Float32BufferAttribute(mp, 3));
   const mMat = new THREE.PointsMaterial({ color: 0xffb3a8, size: 0.028, transparent: true, opacity: 0.6, depthWrite: false, blending: THREE.AdditiveBlending });
@@ -96,19 +97,19 @@ export function initBody(canvas, marksEl, onPick) {
   const bp = bg.attributes.position;
   for (let i = 0; i < bp.count; i++) { tmp.fromBufferAttribute(bp, i); const n = 1 + 0.06 * Math.sin(tmp.x * 68) * Math.sin(tmp.y * 56) * Math.sin(tmp.z * 63); tmp.multiplyScalar(n); bp.setXYZ(i, tmp.x, tmp.y, tmp.z); }
   bg.computeVertexNormals();
-  const brain = new THREE.Mesh(bg, organMat(0xd9483f)); brain.scale.set(0.95, 0.8, 1.1); brain.position.copy(H(0, 1.655, -0.005)); fig.add(brain);
+  const brain = new THREE.Mesh(bg, organMat(0xd9483f)); brain.scale.set(0.92, 0.78, 1.05); brain.position.copy(H(0, 1.555, 0.035)); fig.add(brain);
 
   scene.add(new THREE.AmbientLight(0xffffff, 0.5));
   const l1 = new THREE.PointLight(0xffd0c8, 30, 20); l1.position.set(2, 3, 4); scene.add(l1);
   const l2 = new THREE.PointLight(0xff5a50, 18, 20); l2.position.set(-3, -1, 2); scene.add(l2);
 
   const organs = [
-    { at: H(0.25, 1.06, 0.035), mats: [], cam: [0.5, 0.3, 7.9], look: [0, 0.1, 0] },
-    { at: H(0.098, 0.49, 0.05), mats: [jm], cam: [2.2, 0.2, 5.6], look: [0.3, -0.2, 0] },
-    { at: H(0.035, 1.28, 0.08), mats: [hm], cam: [0.8, 1.35, 2.9], look: [0.08, 1.05, 0] },
-    { at: H(-0.06, 1.135, 0.06), mats: [lm], cam: [-1.0, 1.0, 3.0], look: [-0.12, 0.72, 0] },
-    { at: H(0, 1.0, 0.09), mats: [core.material], cam: [0.6, 0.6, 3.3], look: [0, 0.4, 0] },
-    { at: H(0, 1.66, 0.06), mats: [brain.material], cam: [0.8, 2.25, 3.1], look: [0, 1.8, 0] },
+    { at: H(0.36, 1.1, 0.07), mats: [], cam: [0.5, 0.15, 7.1], look: [0, 0.05, 0] },
+    { at: H(0.13, 0.457, 0.06), mats: [jm], cam: [2.4, 0.3, 5.8], look: [0.35, -0.1, 0] },
+    { at: H(0.03, 1.2, 0.08), mats: [hm], cam: [0.8, 1.2, 2.8], look: [0.07, 0.98, 0] },
+    { at: H(-0.06, 1.075, 0.07), mats: [lm], cam: [-1.0, 0.9, 2.9], look: [-0.12, 0.68, 0] },
+    { at: H(0, 0.98, 0.11), mats: [core.material], cam: [0.6, 0.7, 3.2], look: [0, 0.45, 0] },
+    { at: H(0, 1.56, 0.1), mats: [brain.material], cam: [0.8, 2.15, 3.0], look: [0, 1.75, 0] },
   ];
   const labels = ['Skin', 'Joints', 'Heart', 'Liver', 'Metabolism', 'Mind'];
   const marks = labels.map((t, i) => {
@@ -120,7 +121,7 @@ export function initBody(canvas, marksEl, onPick) {
   });
 
   let step = 0, offX = 0;
-  const camPos = new THREE.Vector3(0.5, 0.3, 7.9), camLook = new THREE.Vector3(0, 0.1, 0);
+  const camPos = new THREE.Vector3(0.5, 0.15, 7.1), camLook = new THREE.Vector3(0, 0.05, 0);
   const wantPos = camPos.clone(), wantLook = camLook.clone();
 
   function setStep(i) {

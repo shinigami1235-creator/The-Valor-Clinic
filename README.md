@@ -21,5 +21,9 @@ Page bodies are in `tools/pages/`. Shared header, footer and icons are in `tools
 
 That rewrites the six HTML files in the root folder.
 
+The body in Look Beyond Your Skin (`assets/figure.bin`) comes from the Apex Surgery body map's `bodies.bin` (MakeHuman base mesh, CC0). To rebuild it:
+
+    python3 tools/body_from_apex.py <path to Apex-Surgery-International>/site/assets/features/bodymap/bodies.bin
+
 ## Stack
 Static HTML, CSS and JavaScript on GitHub Pages. three.js 0.170 and GSAP 3 are in `vendor/`, the Prompt font in `fonts/`.
