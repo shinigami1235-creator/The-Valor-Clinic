@@ -2,7 +2,7 @@
 
 English rebuild of thevalorclinic.com for Valor Clinic, Iyara Tower, Sathorn, Bangkok. A Thai version comes next.
 
-Live preview: https://shinigami1235-creator.github.io/the-valor-clinic/
+Live preview: https://shinigami1235-creator.github.io/The-Valor-Clinic/
 
 ## Pages
 - `index.html`: 3D skin hero (28 days or 4), Look Beyond Your Skin body map, services, psoriasis Q&A videos, testimonials, Google reviews, team, videos, social links, contact
